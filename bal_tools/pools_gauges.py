@@ -282,7 +282,11 @@ class BalPoolsGauges:
         debug: if True, return the extended core pools dict with all attributes and
         without whitelisting and blacklisting
         """
-        candidates = [pool["id"] for pool in self.vebal_voting_list]
+        candidates = [
+            pool["id"]
+            for pool in self.vebal_voting_list
+            if not pool["gauge"]["isKilled"]
+        ]
         core_pools_extended = self.filter_core_pool_candidates(candidates)
 
         if debug:

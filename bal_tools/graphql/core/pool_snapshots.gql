@@ -5,7 +5,6 @@ query PoolsSnapshots($first: Int, $skip: Int, $block: Int) {
     orderBy: timestamp
     orderDirection: desc
     block: { number: $block }
-    where: { protocolFee_not: null }
   ) {
     pool {
       address
@@ -19,9 +18,5 @@ query PoolsSnapshots($first: Int, $skip: Int, $block: Int) {
       }
     }
     timestamp
-    protocolFee
-    swapFees
-    swapVolume
-    liquidity
   }
 }

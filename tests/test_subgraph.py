@@ -105,7 +105,11 @@ def test_get_balancer_pool_snapshots(chain, subgraph_all_chains, pool_snapshot_b
 def test_find_all_subgraph_urls(
     subgraph_all_chains, have_thegraph_key, subgraph_type, monkeypatch, chains_prod_v3
 ):
-    if subgraph_all_chains.chain in ["sepolia", "mode"] and subgraph_type in [
+    if subgraph_all_chains.chain in [
+        "sepolia",
+        "mode",
+        "fraxtal",
+    ] and subgraph_type in [
         "aura",
         "blocks",
     ]:

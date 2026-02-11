@@ -73,15 +73,3 @@ def test_get_balancer_pool_snapshots(subgraph):
     assert snapshot.tokens[0].symbol == "DOLA"
     assert snapshot.tokens[1].symbol == "USDC"
     assert snapshot.timestamp == 1713744000
-    assert pytest.approx(snapshot.protocolFee, rel=Decimal(1e-2)) == Decimal(
-        "20729.00526903175861936991501109402"
-    )
-    assert pytest.approx(snapshot.swapFees, rel=Decimal(1e-2)) == Decimal(
-        "42555.1058049324"
-    )
-    assert pytest.approx(snapshot.swapVolume, rel=Decimal(1e-2)) == Decimal(
-        "114566260.594991"
-    )
-    assert pytest.approx(snapshot.liquidity, rel=Decimal(1e-2)) == Decimal(
-        "2036046.63834962216860375518680805"
-    )

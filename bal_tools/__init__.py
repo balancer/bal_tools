@@ -7,5 +7,5 @@ from .errors import (
 )
 from .subgraph import Subgraph
 from .pools_gauges import BalPoolsGauges
-from .ecosystem import Aura
+from .ecosystem import Aura, StakeDAO
 from .drpc import Web3RpcByChain, Web3Rpc

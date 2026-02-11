@@ -124,15 +124,15 @@ class TokenFee(BaseModel):
 
 class PoolSnapshot(BaseModel):
     timestamp: int
-    protocolFee: Decimal
-    swapFees: Decimal
-    swapVolume: Decimal
-    liquidity: Decimal
     address: str
     id: str
     symbol: str
     totalProtocolFeePaidInBPT: Decimal = Field(default=Decimal(0))
     tokens: List[TokenFee]
+    protocolFee: Optional[Decimal] = Field(default=Decimal(0))
+    swapFees: Optional[Decimal] = Field(default=Decimal(0))
+    swapVolume: Optional[Decimal] = Field(default=Decimal(0))
+    liquidity: Optional[Decimal] = Field(default=Decimal(0))
 
     @field_validator("totalProtocolFeePaidInBPT", mode="before")
     @classmethod

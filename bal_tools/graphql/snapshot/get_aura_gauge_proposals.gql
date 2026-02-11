@@ -1,0 +1,17 @@
+query GetAuraGaugeProposals($first: Int!, $space: String!) {
+  proposals (
+    first: $first,
+    skip: 0,
+    where: {
+      space_in: [$space],
+      title_contains: "Gauge Weight"
+    },
+    orderBy: "created",
+    orderDirection: desc
+  ) {
+    id
+    title
+    scores_total
+    created
+  }
+}

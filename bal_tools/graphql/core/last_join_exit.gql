@@ -1,7 +1,6 @@
 query LastJoinExit($poolId: String!) {
   joinExits(first: 1, orderBy: timestamp, orderDirection: desc, where: {pool: $poolId}) {
-        amounts
-    valueUSD
+    amounts
     id
     sender
     timestamp

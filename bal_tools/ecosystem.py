@@ -1,6 +1,9 @@
 from collections import defaultdict
+import math
+import os
 import re
-from typing import Dict, List
+import statistics
+from typing import Dict
 from .errors import (
     UnexpectedListLengthError,
     MultipleMatchesError,
@@ -9,8 +12,8 @@ from .errors import (
 from web3 import Web3
 import requests
 from .subgraph import Subgraph
+from .drpc import Web3RpcByChain
 from .utils import to_checksum_address
-from .models import PropData
 
 
 AURA_L2_DEFAULT_GAUGE_STAKER = to_checksum_address(
@@ -191,18 +194,54 @@ class Snapshot:
             return votes
 
 
-class HiddenHand:
-    AURA_URL = "https://api.hiddenhand.finance/proposal/aura"
+class StakeDAO:
+    ANALYTICS_BASE_URL = "https://raw.githubusercontent.com/stake-dao/votemarket-analytics/refs/heads/main/analytics/votemarket-analytics/balancer"
 
-    def fetch_aura_bribs(self) -> List[PropData]:
-        """
-        Fetch GET bribes from hidden hand api
-        """
-        res = requests.get(self.AURA_URL)
-        if not res.ok:
-            raise ValueError("Error fetching bribes from hidden hand api")
+    def __init__(self):
+        self.subgraph = Subgraph()
 
-        res_parsed = res.json()
-        if res_parsed["error"]:
-            raise ValueError("HH API returned error")
-        return [PropData(**prop_data) for prop_data in res_parsed["data"]]
+    def get_aura_max_votes_from_snapshot(self, n_rounds: int = 5) -> int:
+        data = self.subgraph.fetch_graphql_data(
+            subgraph="snapshot",
+            query="get_aura_gauge_proposals",
+            params={"space": "gauges.aurafinance.eth", "first": n_rounds},
+        )
+        proposals = data.get("proposals", [])
+        if not proposals:
+            raise ValueError("No Aura gauge weight proposals found on Snapshot")
+        return int(max(p["scores_total"] for p in proposals if p.get("scores_total")))
+
+    def get_cpv_from_analytics(self, n_rounds: int = 4) -> float:
+        metadata_url = f"{self.ANALYTICS_BASE_URL}/rounds-metadata.json"
+        response = requests.get(metadata_url, timeout=30)
+        response.raise_for_status()
+        rounds = response.json()
+
+        latest_rounds = sorted(rounds, key=lambda x: x["id"], reverse=True)[:n_rounds]
+        cpv_values = []
+        for round_info in latest_rounds:
+            round_url = f"{self.ANALYTICS_BASE_URL}/{round_info['id']}.json"
+            response = requests.get(round_url, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            cpv = data.get("globalAverageDollarPerVote")
+            if cpv and cpv > 0:
+                cpv_values.append(float(cpv))
+
+        if not cpv_values:
+            raise ValueError("No valid CPV data found in StakeDAO analytics")
+        return statistics.mean(cpv_values)
+
+    def calculate_dynamic_min_incentive(
+        self, n_rounds: int = 4, buffer_pct: float = 0.5, block_number: int = None
+    ) -> int:
+        max_votes = self.get_aura_max_votes_from_snapshot(n_rounds)
+        avg_cpv = self.get_cpv_from_analytics(n_rounds)
+
+        web3 = Web3RpcByChain(os.getenv("DRPC_KEY"))["mainnet"]
+        block = block_number if block_number else web3.eth.block_number
+        aura_vebal_share = float(self.subgraph.calculate_aura_vebal_share(web3, block))
+
+        min_aura_portion = max_votes * 0.001 * (1 + buffer_pct) * avg_cpv
+        min_total_bribe = min_aura_portion / aura_vebal_share
+        return int(math.ceil(min_total_bribe / 10) * 10)
