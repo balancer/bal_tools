@@ -6,6 +6,7 @@ DRPC_NAME_OVERRIDES = {
     "mainnet": "ethereum",
     "zkevm": "polygon-zkevm",
     "hyperevm": "hyperliquid",
+    "monad": "monad-mainnet",
 }
 ADAPTER = HTTPAdapter(
     pool_connections=20,
