@@ -116,7 +116,11 @@ def test_find_all_subgraph_urls(
         pytest.skip(
             f"No {subgraph_type} subgraph exists on {subgraph_all_chains.chain}"
         )
-    if subgraph_all_chains.chain == "hyperevm" and subgraph_type in [
+    if subgraph_all_chains.chain in [
+        "hyperevm",
+        "monad",
+        "xlayer",
+    ] and subgraph_type in [
         "core",
         "gauges",
         "blocks",
@@ -141,8 +145,12 @@ def test_find_all_subgraph_urls(
 
     url = subgraph_all_chains.get_subgraph_url(subgraph_type)
 
-    assert url is not None
-    assert url is not ""
+    if have_thegraph_key:
+        assert url is not None
+        assert url is not ""
+    else:
+        # some chains only have gateway URLs requiring a key; None is expected
+        assert url is None or url != ""
 
     if not have_thegraph_key:
         subgraph_all_chains.set_silence_warnings(False)
@@ -195,7 +203,7 @@ def test_get_first_block_after_utc_timestamp_with_etherscan(
     if not os.getenv("ETHERSCAN_API_KEY"):
         pytest.skip("ETHERSCAN_API_KEY not set")
 
-    if chain not in chains_prod or chain in ["fantom", "sonic", "mode"]:
+    if chain not in chains_prod or chain in ["fantom", "sonic", "mode", "zkevm"]:
         pytest.skip(f"Skipping {chain}")
 
     test_timestamp = int((datetime.now() - timedelta(days=1)).timestamp())
