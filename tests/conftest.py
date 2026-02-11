@@ -14,7 +14,7 @@ from bal_tools.drpc import Web3Rpc
 
 load_dotenv()
 
-exempt_chains = ["fantom", "goerli", "sonic"]
+exempt_chains = ["fantom", "goerli", "sonic", "monad"]
 chains = [chain for chain in list(chain_ids_by_name()) if chain not in exempt_chains]
 
 
