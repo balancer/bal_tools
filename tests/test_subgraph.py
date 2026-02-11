@@ -145,8 +145,12 @@ def test_find_all_subgraph_urls(
 
     url = subgraph_all_chains.get_subgraph_url(subgraph_type)
 
-    assert url is not None
-    assert url is not ""
+    if have_thegraph_key:
+        assert url is not None
+        assert url is not ""
+    else:
+        # some chains only have gateway URLs requiring a key; None is expected
+        assert url is None or url != ""
 
     if not have_thegraph_key:
         subgraph_all_chains.set_silence_warnings(False)
