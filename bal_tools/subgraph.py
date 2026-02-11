@@ -63,6 +63,10 @@ AURA_SUBGRAPHS_BY_CHAIN = {
     "avalanche": f"{AURA_SUBGRAPH_URI}/aura-finance-avalanche/v0.0.1/",
     "plasma": None,
 }
+BLOCKS_SUBGRAPHS_BY_CHAIN = {
+    "base": "GU5jJMiEHpomqddtbsXC3Avj3EweLHk6up1pvy2TCQQZ",
+}
+
 VAULT_V3_SUBGRAPHS_BY_CHAIN, VAULT_V3_SUBGRAPHS_BY_CHAIN_DEV = url_dict_from_df(
     vault_df
 )
@@ -108,6 +112,12 @@ class Subgraph:
             return SNAPSHOT_URL
         if subgraph == "aura":
             return AURA_SUBGRAPHS_BY_CHAIN.get(self.chain, None)
+        if subgraph == "blocks":
+            subgraph_id = BLOCKS_SUBGRAPHS_BY_CHAIN.get(self.chain)
+            if subgraph_id:
+                graph_api_key = os.getenv("GRAPH_API_KEY")
+                if graph_api_key:
+                    return f"https://gateway.thegraph.com/api/{graph_api_key}/subgraphs/id/{subgraph_id}"
         url = self.get_subgraph_url_from_backend_config(subgraph)
         if url:
             return url
