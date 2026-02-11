@@ -1,7 +1,7 @@
 from typing import Dict, List, Union
 import json
 import requests
-from .utils import to_checksum_address, flatten_nested_dict
+from .utils import to_checksum_address, flatten_nested_dict, chain_names_prod
 
 from gql.transport.exceptions import TransportQueryError
 from bal_tools.safe_tx_builder import ZERO_ADDRESS
@@ -292,21 +292,7 @@ class BalPoolsGauges:
         if debug:
             return core_pools_extended
 
-        core_pools = {
-            "mainnet": {},
-            "polygon": {},
-            "arbitrum": {},
-            "gnosis": {},
-            "zkevm": {},
-            "avalanche": {},
-            "base": {},
-            "mode": {},
-            "fraxtal": {},
-            "hyperevm": {},
-            "optimism": {},
-            "plasma": {},
-            "monad": {},
-        }
+        core_pools = {chain: {} for chain in chain_names_prod()}
 
         # summarise extended core pools dict into core_pools dict
         for pool in core_pools_extended:

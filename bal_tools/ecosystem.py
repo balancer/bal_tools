@@ -200,7 +200,7 @@ class StakeDAO:
     def __init__(self):
         self.subgraph = Subgraph()
 
-    def get_aura_max_votes_from_snapshot(self, n_rounds: int = 2) -> int:
+    def get_aura_max_votes_from_snapshot(self, n_rounds: int = 5) -> int:
         data = self.subgraph.fetch_graphql_data(
             subgraph="snapshot",
             query="get_aura_gauge_proposals",
@@ -211,7 +211,7 @@ class StakeDAO:
             raise ValueError("No Aura gauge weight proposals found on Snapshot")
         return int(max(p["scores_total"] for p in proposals if p.get("scores_total")))
 
-    def get_cpv_from_analytics(self, n_rounds: int = 2) -> float:
+    def get_cpv_from_analytics(self, n_rounds: int = 4) -> float:
         metadata_url = f"{self.ANALYTICS_BASE_URL}/rounds-metadata.json"
         response = requests.get(metadata_url, timeout=30)
         response.raise_for_status()
@@ -233,15 +233,14 @@ class StakeDAO:
         return statistics.mean(cpv_values)
 
     def calculate_dynamic_min_incentive(
-        self, n_rounds: int = 2, buffer_pct: float = 0.5
+        self, n_rounds: int = 4, buffer_pct: float = 0.5, block_number: int = None
     ) -> int:
         max_votes = self.get_aura_max_votes_from_snapshot(n_rounds)
         avg_cpv = self.get_cpv_from_analytics(n_rounds)
 
         web3 = Web3RpcByChain(os.getenv("DRPC_KEY"))["mainnet"]
-        aura_vebal_share = float(
-            self.subgraph.calculate_aura_vebal_share(web3, web3.eth.block_number)
-        )
+        block = block_number if block_number else web3.eth.block_number
+        aura_vebal_share = float(self.subgraph.calculate_aura_vebal_share(web3, block))
 
         min_aura_portion = max_votes * 0.001 * (1 + buffer_pct) * avg_cpv
         min_total_bribe = min_aura_portion / aura_vebal_share
