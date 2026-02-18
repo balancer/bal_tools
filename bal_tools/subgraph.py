@@ -15,7 +15,7 @@ from gql.transport.requests import RequestsHTTPTransport
 from gql.transport.exceptions import TransportServerError
 from web3 import Web3
 
-from .utils import get_abi, flatten_nested_dict, chain_ids_by_name
+from .utils import get_abi, chain_ids_by_name
 from .models import *
 from .errors import NoPricesFoundError
 from .ts_config_loader import ts_config_loader
@@ -599,14 +599,14 @@ class Subgraph:
             )
             all_pools.extend(
                 [
-                    PoolSnapshot(**flatten_nested_dict(pool))
-                    for pool in result["poolSnapshots"]
+                    PoolSnapshot(**pool)
+                    for pool in result["pools"]
                 ]
             )
             offset += pools_per_req
             if offset >= limit:
                 break
-            if len(result["poolSnapshots"]) < pools_per_req:
+            if len(result["pools"]) < pools_per_req:
                 break
         return all_pools
 

@@ -72,4 +72,3 @@ def test_get_balancer_pool_snapshots(subgraph):
     assert snapshot.symbol == "DOLA-USDC BSP"
     assert snapshot.tokens[0].symbol == "DOLA"
     assert snapshot.tokens[1].symbol == "USDC"
-    assert snapshot.timestamp == 1713744000

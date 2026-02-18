@@ -89,29 +89,26 @@ MOCK_VEBAL_GET_VOTING_LIST = {
 }
 
 MOCK_POOL_SNAPSHOTS = {
-    "poolSnapshots": [
+    "pools": [
         {
-            "pool": {
-                "address": "0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6",
-                "id": (
-                    "0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6000200000000000000000426"
-                ),
-                "symbol": "DOLA-USDC BSP",
-                "totalProtocolFeePaidInBPT": None,
-                "tokens": [
-                    {
-                        "symbol": "DOLA",
-                        "address": "0x865377367054516e17014ccded1e7d814edc9ce4",
-                        "paidProtocolFees": "16082.944140240944392276",
-                    },
-                    {
-                        "symbol": "USDC",
-                        "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                        "paidProtocolFees": "4706.131322",
-                    },
-                ],
-            },
-            "timestamp": 1713744000,
+            "address": "0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6",
+            "id": (
+                "0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6000200000000000000000426"
+            ),
+            "symbol": "DOLA-USDC BSP",
+            "totalProtocolFeePaidInBPT": None,
+            "tokens": [
+                {
+                    "symbol": "DOLA",
+                    "address": "0x865377367054516e17014ccded1e7d814edc9ce4",
+                    "paidProtocolFees": "16082.944140240944392276",
+                },
+                {
+                    "symbol": "USDC",
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "paidProtocolFees": "4706.131322",
+                },
+            ],
         }
     ]
 }

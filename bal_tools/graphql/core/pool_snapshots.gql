@@ -1,22 +1,19 @@
-query PoolsSnapshots($first: Int, $skip: Int, $block: Int) {
-  poolSnapshots(
+query PoolsAtBlock($first: Int, $skip: Int, $block: Int) {
+  pools(
     first: $first
     skip: $skip
-    orderBy: timestamp
-    orderDirection: desc
+    orderBy: id
+    orderDirection: asc
     block: { number: $block }
   ) {
-    pool {
-      address
-      id
+    address
+    id
+    symbol
+    totalProtocolFeePaidInBPT
+    tokens {
       symbol
-      totalProtocolFeePaidInBPT
-      tokens {
-        symbol
-        address
-        paidProtocolFees
-      }
+      address
+      paidProtocolFees
     }
-    timestamp
   }
 }
