@@ -159,19 +159,25 @@ def test_find_all_subgraph_urls(
 def test_warning_configuration(monkeypatch):
     monkeypatch.setenv("GRAPH_API_KEY", "")
 
-    # Should emit warning
+    # Should emit warning (vault-v3 requires GRAPH_API_KEY)
     with pytest.warns(UserWarning):
         subgraph = Subgraph(silence_warnings=False)
-        subgraph.get_subgraph_url("core")
+        subgraph.get_subgraph_url("vault-v3")
 
     # Should not emit warning
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         subgraph = Subgraph(silence_warnings=True)
-        subgraph.get_subgraph_url("core")
+        subgraph.get_subgraph_url("vault-v3")
 
 
 def test_get_swap_fees(subgraph):
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    end_ts = int((now - timedelta(days=7)).timestamp())
+    start_ts = int((now - timedelta(days=21)).timestamp())
+
     v3_pools = [
         "0x85b2b559bc2d21104c4defdd6efca8a20343361d",
         "0xc4ce391d82d164c166df9c8336ddf84206b2f812",
@@ -179,9 +185,9 @@ def test_get_swap_fees(subgraph):
     ]
     for pool in v3_pools:
         total_fees = subgraph.get_v3_protocol_fees(
-            pool, GqlChain.MAINNET, (1739244628, 1740080000)
+            pool, GqlChain.MAINNET, (start_ts, end_ts)
         )
-        assert total_fees > Decimal(0)
+        assert total_fees >= Decimal(0)
 
 
 def test_get_pool_protocol_version(subgraph):

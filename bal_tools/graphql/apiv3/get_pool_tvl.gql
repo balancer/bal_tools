@@ -1,4 +1,4 @@
-query PoolTVL($chain: GqlChain, $poolId: String!) {
+query PoolTVL($chain: GqlChain!, $poolId: String!) {
   poolGetPool(chain: $chain, id: $poolId) {
     dynamicData {
       totalLiquidity

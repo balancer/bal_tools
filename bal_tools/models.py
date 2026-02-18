@@ -123,7 +123,7 @@ class TokenFee(BaseModel):
 
 
 class PoolSnapshot(BaseModel):
-    timestamp: int
+    timestamp: int = 0
     address: str
     id: str
     symbol: str
