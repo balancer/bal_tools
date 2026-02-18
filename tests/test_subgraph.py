@@ -159,16 +159,16 @@ def test_find_all_subgraph_urls(
 def test_warning_configuration(monkeypatch):
     monkeypatch.setenv("GRAPH_API_KEY", "")
 
-    # Should emit warning
+    # Should emit warning (vault-v3 requires GRAPH_API_KEY)
     with pytest.warns(UserWarning):
         subgraph = Subgraph(silence_warnings=False)
-        subgraph.get_subgraph_url("core")
+        subgraph.get_subgraph_url("vault-v3")
 
     # Should not emit warning
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         subgraph = Subgraph(silence_warnings=True)
-        subgraph.get_subgraph_url("core")
+        subgraph.get_subgraph_url("vault-v3")
 
 
 def test_get_swap_fees(subgraph):
