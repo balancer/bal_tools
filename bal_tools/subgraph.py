@@ -597,12 +597,7 @@ class Subgraph:
                 "pool_snapshots",
                 {"first": pools_per_req, "skip": offset, "block": block},
             )
-            all_pools.extend(
-                [
-                    PoolSnapshot(**pool)
-                    for pool in result["pools"]
-                ]
-            )
+            all_pools.extend([PoolSnapshot(**pool) for pool in result["pools"]])
             offset += pools_per_req
             if offset >= limit:
                 break
