@@ -1,4 +1,4 @@
-query PoolPreferentialGauge($chain: GqlChain, $poolId: String!) {
+query PoolPreferentialGauge($chain: GqlChain!, $poolId: String!) {
   poolGetPool(chain: $chain, id: $poolId) {
     staking {
       gauge {
