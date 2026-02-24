@@ -92,22 +92,23 @@ class Subgraph:
         else:
             warnings.filterwarnings("default", module="bal_tools.subgraph")
 
-    def get_subgraph_url(self, subgraph="core") -> str:
+    def get_subgraph_url(self, subgraph="core", use_full_subgraph=False) -> str:
         """
         perform some soup magic to determine the latest subgraph url
 
         sources used (in order of priority):
-        1. sdk config file
+        1. backend config file
         2. frontend v2 config file
         3. frontend v2 config file (legacy style; for chains not supported by decentralised the graph)
+        4. sdk config file
 
         params:
         - subgraph: "apiv3", "vault-v3", "pools-v3", "core", "gauges", "blocks" or "aura"
+        - use_full_subgraph: use the full subgraph instead of the smaller backend config variant
 
         returns:
         - https url of the subgraph
         """
-        # before anything else, try to get the url from the latest backend config
         if subgraph == "snapshot":
             return SNAPSHOT_URL
         if subgraph == "aura":
@@ -118,9 +119,10 @@ class Subgraph:
                 graph_api_key = os.getenv("GRAPH_API_KEY")
                 if graph_api_key:
                     return f"https://gateway.thegraph.com/api/{graph_api_key}/subgraphs/id/{subgraph_id}"
-        url = self.get_subgraph_url_from_backend_config(subgraph)
-        if url:
-            return url
+        if not use_full_subgraph:
+            url = self.get_subgraph_url_from_backend_config(subgraph)
+            if url:
+                return url
         if subgraph == "apiv3":
             if self.chain == "sepolia":
                 return "https://test-api-v3.balancer.fi"
@@ -372,6 +374,7 @@ class Subgraph:
                     headers={
                         "x-graphql-client-name": "Maxxis",
                         "x-graphql-client-version": f"bal_tools/v{VERSION}",
+                        "Accept-Encoding": "identity",
                     },
                 )
                 client = Client(transport=transport, fetch_schema_from_transport=False)
@@ -583,11 +586,13 @@ class Subgraph:
         timestamp: int = None,
         pools_per_req: int = 1000,
         limit: int = 5000,
+        use_full_subgraph: bool = False,
     ) -> List[PoolSnapshot]:
         if not any([block, timestamp]):
             raise ValueError("Must pass either block or timestamp")
 
         block = block or self.get_first_block_after_utc_timestamp(timestamp)
+        url = self.get_subgraph_url("core", use_full_subgraph=use_full_subgraph)
 
         all_pools = []
         offset = 0
@@ -596,6 +601,7 @@ class Subgraph:
                 "core",
                 "pool_snapshots",
                 {"first": pools_per_req, "skip": offset, "block": block},
+                url=url,
             )
             all_pools.extend([PoolSnapshot(**pool) for pool in result["pools"]])
             offset += pools_per_req
