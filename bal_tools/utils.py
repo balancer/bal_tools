@@ -7,7 +7,7 @@ import requests
 
 
 CHAINS = requests.get(
-    "https://raw.githubusercontent.com/BalancerMaxis/bal_addresses/refs/heads/main/extras/chains.json"
+    "https://raw.githubusercontent.com/balancer/bal_addresses/refs/heads/main/extras/chains.json"
 ).json()
 
 

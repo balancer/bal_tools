@@ -17,10 +17,10 @@ from bal_tools.models import (
 )
 
 GITHUB_RAW_OUTPUTS = (
-    "https://raw.githubusercontent.com/BalancerMaxis/bal_addresses/main/outputs"
+    "https://raw.githubusercontent.com/balancer/bal_addresses/main/outputs"
 )
 GITHUB_RAW_CONFIG = (
-    "https://raw.githubusercontent.com/BalancerMaxis/bal_addresses/main/config"
+    "https://raw.githubusercontent.com/balancer/bal_addresses/main/config"
 )
 
 
