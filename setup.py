@@ -20,7 +20,7 @@ setup(
             "safe_tx_builder/templates/*.json",
         ]
     },
-    url="https://github.com/BalancerMaxis/bal_tools",
+    url="https://github.com/balancer/bal_tools",
     install_requires=[
         "wheel",
         "web3>=6.0.0",
@@ -37,7 +37,7 @@ setup(
     ],
     extras_require={
         "brownie": [
-            "eth-brownie @ git+https://github.com/BalancerMaxis/brownie.git@v1.20.x"
+            "eth-brownie @ git+https://github.com/balancer/brownie.git@v1.20.x"
         ],
     },
     keywords=["python", "first package"],
