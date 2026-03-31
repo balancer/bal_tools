@@ -1,0 +1,9 @@
+query GetPoolFeesAtBlock($poolId: ID!, $block: Int!) {
+  pool(id: $poolId, block: { number: $block }) {
+    tokens {
+      address
+      totalProtocolSwapFee
+      totalProtocolYieldFee
+    }
+  }
+}

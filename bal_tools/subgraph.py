@@ -612,34 +612,52 @@ class Subgraph:
         return all_pools
 
     def get_v3_protocol_fees(
-        self, pool_id: str, chain: GqlChain, date_range: DateRange
+        self,
+        pool_id: str,
+        chain: GqlChain,
+        date_range: DateRange,
+        block_range: tuple = None,
     ) -> Decimal:
         """
-        Fetches the protocol fees for a given v3 pool over `date range`
-        NOTE: assumes `date range` is within a 2 week period
-        """
-        fee_snapshot = self.fetch_graphql_data(
-            "vault-v3",
-            "get_protocol_fees",
-            {
-                "id": pool_id,
-                "ts_gt": date_range[0],
-                "ts_lt": date_range[1],
-                "first": 14,
-                "orderBy": "timestamp",
-                "orderDirection": "desc",
-            },
-        )["poolSnapshots"]
+        Fetches the protocol fees for a given v3 pool over `date_range`.
 
-        if not fee_snapshot:
+        Uses block time-travel queries on PoolToken cumulative fee fields,
+        diffing values at the start and end blocks of the period.
+
+        params:
+        - pool_id: the pool address
+        - chain: the chain to query prices on
+        - date_range: (start_timestamp, end_timestamp)
+        - block_range: optional (start_block, end_block) to avoid redundant
+          timestamp-to-block lookups when the caller already has them
+        """
+        if block_range:
+            start_block, end_block = block_range
+        else:
+            start_block = self.get_first_block_after_utc_timestamp(date_range[0])
+            end_block = self.get_first_block_after_utc_timestamp(date_range[1])
+
+        query_name = "get_pool_fees_at_block"
+        start_data = self.fetch_graphql_data(
+            "vault-v3", query_name, {"poolId": pool_id, "block": start_block}
+        )
+        end_data = self.fetch_graphql_data(
+            "vault-v3", query_name, {"poolId": pool_id, "block": end_block}
+        )
+
+        if not end_data.get("pool") or not end_data["pool"].get("tokens"):
             return Decimal(0)
 
-        # descending so first/last snaps are end/start of time window
-        end_fee_snapshot, start_fee_snapshot = fee_snapshot[0], fee_snapshot[-1]
+        end_tokens = end_data["pool"]["tokens"]
+        start_tokens = start_data["pool"]["tokens"] if start_data.get("pool") else None
 
-        token_addresses = [
-            token["address"] for token in end_fee_snapshot["pool"]["tokens"]
-        ]
+        # build a lookup for start fees by token address
+        start_fees = {}
+        if start_tokens:
+            for t in start_tokens:
+                start_fees[t["address"]] = t
+
+        token_addresses = [t["address"] for t in end_tokens]
 
         token_prices = self.get_twap_price_token(
             addresses=token_addresses,
@@ -648,21 +666,16 @@ class Subgraph:
         )
 
         total_fees = Decimal(0)
-        for (
-            end_swap_fee,
-            end_yield_fee,
-            start_swap_fee,
-            start_yield_fee,
-            twap_token,
-        ) in zip(
-            end_fee_snapshot["totalProtocolSwapFees"],
-            end_fee_snapshot["totalProtocolYieldFees"],
-            start_fee_snapshot["totalProtocolSwapFees"],
-            start_fee_snapshot["totalProtocolYieldFees"],
-            token_prices,
-        ):
-            swap_fee_diff = Decimal(end_swap_fee) - Decimal(start_swap_fee)
-            yield_fee_diff = Decimal(end_yield_fee) - Decimal(start_yield_fee)
+        for end_token, twap_token in zip(end_tokens, token_prices):
+            addr = end_token["address"]
+            start_token = start_fees.get(addr, {})
+
+            swap_fee_diff = Decimal(end_token["totalProtocolSwapFee"]) - Decimal(
+                start_token.get("totalProtocolSwapFee", "0")
+            )
+            yield_fee_diff = Decimal(end_token["totalProtocolYieldFee"]) - Decimal(
+                start_token.get("totalProtocolYieldFee", "0")
+            )
             total_fees += (swap_fee_diff + yield_fee_diff) * twap_token.twap_price
 
         return total_fees
