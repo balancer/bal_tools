@@ -9,11 +9,5 @@ query GetV3Fees($poolId: ID!) {
       vaultProtocolYieldFeeBalance
       controllerProtocolFeeBalance
     }
-    snapshots(first: 1, orderBy: timestamp, orderDirection: desc) {
-      timestamp
-      balances
-      totalProtocolSwapFees
-      totalProtocolYieldFees
-    }
   }
 }
