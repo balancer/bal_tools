@@ -24,30 +24,39 @@ from ._version import __version__ as VERSION
 
 
 def url_dict_from_df(df):
-    return (
-        dict(
+    if df is None:
+        return {}, {}
+    try:
+        urls = dict(
             zip(
                 df["Network"].str.lower().replace("ethereum", "mainnet"),
-                df["Production URL"].str.replace("open in new window", ""),
+                df["URL"].str.replace("open in new window", ""),
             )
-        ),
-        dict(
-            zip(
-                df["Network"].str.lower().replace("ethereum", "mainnet"),
-                df["Development URL (rate-limited)"].str.replace(
-                    "open in new window", ""
-                ),
-            )
-        ),
-    )
+        )
+        return urls, dict(urls)
+    except KeyError as e:
+        warnings.warn(
+            f"v3 subgraph docs table missing expected column {e!r}; "
+            f"falling back to backend config only",
+            UserWarning,
+        )
+        return {}, {}
 
 
 graphql_base_path = f"{os.path.dirname(os.path.abspath(__file__))}/graphql"
-vault_df, pools_df = pd.read_html(
-    "https://docs.balancer.fi/data-and-analytics/data-and-analytics/subgraph.html",
-    match="Network",
-    flavor="lxml",
-)
+try:
+    vault_df, pools_df = pd.read_html(
+        "https://docs.balancer.fi/data-and-analytics/data-and-analytics/subgraph.html",
+        match="Network",
+        flavor="lxml",
+    )
+except Exception as e:
+    warnings.warn(
+        f"failed to scrape v3 subgraph urls from docs ({e!r}); "
+        f"falling back to backend config only",
+        UserWarning,
+    )
+    vault_df = pools_df = None
 
 SNAPSHOT_URL = "https://hub.snapshot.org/graphql"
 AURA_SUBGRAPH_URI = "https://api.subgraph.ormilabs.com/api/public/396b336b-4ed7-469f-a8f4-468e1e26e9a8/subgraphs"
