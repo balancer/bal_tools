@@ -1,5 +1,5 @@
 wheel
-web3>=6.0.0
+web3>=7.15.0
 pathlib>=1.0
 numpy==1.26.4
 pandas
