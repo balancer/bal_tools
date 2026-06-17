@@ -6,7 +6,11 @@ all TypeScript configuration files from the Balancer backend repository.
 """
 
 import requests
-from bal_tools.ts_config_loader import ts_config_loader, _to_json, _extract_object_literal
+from bal_tools.ts_config_loader import (
+    ts_config_loader,
+    _to_json,
+    _extract_object_literal,
+)
 
 
 def test_spread_of_imported_identifiers():
