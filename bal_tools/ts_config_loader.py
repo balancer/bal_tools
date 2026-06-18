@@ -176,6 +176,13 @@ def _to_json(obj: str) -> str:
 
     obj = handle_spread_with_map(obj)
 
+    # Drop spreads of imported identifiers we can't resolve, e.g.
+    # workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2]
+    # These reference imported arrays that aren't available to the parser.
+    obj = re.sub(r"\.\.\.[A-Za-z_$][\w$]*\s*,?", "", obj)
+    # Remove any leftover leading comma the removal above may produce ([, ...])
+    obj = re.sub(r"\[\s*,", "[", obj)
+
     # Then handle simple spread operators: ...[array] -> [array]
     obj = re.sub(r"\.\.\.\s*\[", "[", obj)
 
